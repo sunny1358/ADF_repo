@@ -1,0 +1,28 @@
+{
+	"name": "DS_UsersCSV_SA",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LinkedService_StorageAccount",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobStorageLocation",
+				"fileName": {
+					"value": "@concat('users_', formatDateTime(utcNow(), 'yyyy-dd-MM'),'.csv')",
+					"type": "Expression"
+				},
+				"folderPath": "users",
+				"container": "devcontainer"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

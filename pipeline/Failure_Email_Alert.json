@@ -1,0 +1,42 @@
+{
+	"name": "Failure_Email_Alert",
+	"properties": {
+		"activities": [
+			{
+				"name": "FailEmailAlert",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://prod-27.eastus.logic.azure.com:443/workflows/0dab07ad59d64cd1a06887d5131311fb/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=DDtgWFHRQkOuxNtSCa25Sf1QIflNAuTX25OT3SbIo6w",
+					"method": "POST",
+					"headers": {
+						"Content-Type": "application/json"
+					},
+					"body": {
+						"value": "{\n    \"title\" : \"PIPELINE EXECUTION FAILED!\",\n    \"color\" : \"Red\",\n    \"Message\" : \"@{pipeline().parameters.emessage}\",\n    \"PipelineName\" : \"@{pipeline()?.TriggeredByPipelineName}\",\n    \"DataFactoryName\" : \"@{pipeline().DataFactory}\",\n    \"PipelineRunId\" : \"@{pipeline()?.TriggeredByPipelineRunId}\",\n    \"time\" : \"@{utcNow('G')}\"\n}",
+						"type": "Expression"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"emessage": {
+				"type": "string"
+			}
+		},
+		"folder": {
+			"name": "COMMON_PIPELINE"
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-05-26T13:42:34Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

@@ -1,0 +1,126 @@
+{
+	"name": "PL_APItoSnowflake",
+	"properties": {
+		"activities": [
+			{
+				"name": "API to Blob Storage",
+				"type": "Copy",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "RestSource",
+						"httpRequestTimeout": "00:01:40",
+						"requestInterval": "00.00:00:00.010",
+						"requestMethod": "GET",
+						"paginationRules": {
+							"supportRFC5988": "true"
+						}
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobStorageWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".csv"
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "LinkedService_StorageAccount",
+							"type": "LinkedServiceReference"
+						},
+						"path": "devcontainer/users",
+						"enableCompression": true
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "Dataset_API",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_UsersCSV_SA",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "blob to snowflake",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "API to Blob Storage",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "DelimitedTextSource",
+						"storeSettings": {
+							"type": "AzureBlobStorageReadSettings",
+							"recursive": true,
+							"enablePartitionDiscovery": false
+						},
+						"formatSettings": {
+							"type": "DelimitedTextReadSettings"
+						}
+					},
+					"sink": {
+						"type": "SnowflakeSink",
+						"preCopyScript": "truncate \"DEMO_DB\".\"PUBLIC\".\"USER_DETAILS\"",
+						"importSettings": {
+							"type": "SnowflakeImportCopyCommand"
+						}
+					},
+					"enableStaging": true,
+					"stagingSettings": {
+						"linkedServiceName": {
+							"referenceName": "LinkedService_StorageAccount",
+							"type": "LinkedServiceReference"
+						},
+						"path": "devcontainer/staging"
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DS_UsersCSV_SA",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "DS_Snowflake",
+						"type": "DatasetReference"
+					}
+				]
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2022-05-30T13:01:21Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

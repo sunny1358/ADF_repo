@@ -1,0 +1,28 @@
+{
+	"name": "EmployeeCSV_ADLS",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LinkedService_ADLS",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "DelimitedText",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": {
+					"value": "@concat('employee_', formatDateTime(utcNow(), 'yyyy-dd-MM'),'.csv')",
+					"type": "Expression"
+				},
+				"folderPath": "employee",
+				"fileSystem": "adlsdev"
+			},
+			"columnDelimiter": ",",
+			"escapeChar": "\\",
+			"firstRowAsHeader": true,
+			"quoteChar": "\""
+		},
+		"schema": []
+	},
+	"type": "Microsoft.DataFactory/factories/datasets"
+}

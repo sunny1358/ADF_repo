@@ -1,0 +1,248 @@
+{
+	"name": "PL_Snowflake",
+	"properties": {
+		"activities": [
+			{
+				"name": "CallStoredProcedure",
+				"type": "Script",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "LinkedService_Snowflake",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"parameters": [
+								{
+									"name": "EmpName",
+									"type": "String",
+									"value": {
+										"value": "@pipeline().parameters.Name",
+										"type": "Expression"
+									},
+									"direction": "Input"
+								},
+								{
+									"name": "EmpLocation",
+									"type": "String",
+									"value": {
+										"value": "@pipeline().parameters.Location",
+										"type": "Expression"
+									},
+									"direction": "Input"
+								}
+							],
+							"type": "NonQuery",
+							"text": "CALL employee_insert(?,?);"
+						}
+					],
+					"logSettings": {
+						"logDestination": "ActivityOutput"
+					}
+				}
+			},
+			{
+				"name": "FailEmailAlert",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "CallStoredProcedure",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://prod-27.eastus.logic.azure.com:443/workflows/0dab07ad59d64cd1a06887d5131311fb/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=DDtgWFHRQkOuxNtSCa25Sf1QIflNAuTX25OT3SbIo6w",
+					"method": "POST",
+					"headers": {
+						"Content-Type": "application/json"
+					},
+					"body": {
+						"value": "{\n    \"title\" : \"PIPELINE EXECUTION FAILED!\",\n    \"color\" : \"Red\",\n    \"Message\" : \"@{activity('CallStoredProcedure').Error.Message}\",\n    \"PipelineName\" : \"@{pipeline().Pipeline}\",\n    \"DataFactoryName\" : \"@{pipeline().DataFactory}\",\n    \"PipelineRunId\" : \"@{pipeline().RunId}\",\n    \"time\" : \"@{utcNow('G')}\"\n}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "SuccessEmailAlert",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "CallStoredProcedure",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": "https://prod-27.eastus.logic.azure.com:443/workflows/0dab07ad59d64cd1a06887d5131311fb/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=DDtgWFHRQkOuxNtSCa25Sf1QIflNAuTX25OT3SbIo6w",
+					"method": "POST",
+					"headers": {
+						"Content-Type": "application/json"
+					},
+					"body": {
+						"value": "{\n    \"title\" : \"PIPELINE EXECUTED SUCCESSFULLY!\",\n    \"color\" : \"Green\",\n    \"Message\" : \"PIPELINE EXECUTED SUCCESSFULLY!\",\n    \"PipelineName\" : \"@{pipeline().Pipeline}\",\n    \"DataFactoryName\" : \"@{pipeline().DataFactory}\",\n    \"PipelineRunId\" : \"@{pipeline().RunId}\",\n    \"time\" : \"@{utcNow('G')}\"\n}",
+						"type": "Expression"
+					}
+				}
+			},
+			{
+				"name": "DF_LOGS",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "SuccessEmailAlert",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "DF_LOGS",
+						"type": "DataFlowReference",
+						"parameters": {
+							"DFName": {
+								"value": "'@{pipeline().DataFactory}'",
+								"type": "Expression"
+							},
+							"PipelineName": {
+								"value": "'@{pipeline().Pipeline}'",
+								"type": "Expression"
+							},
+							"Status": {
+								"value": "'@{string('success')}'",
+								"type": "Expression"
+							},
+							"RunId": {
+								"value": "'@{pipeline().RunId}'",
+								"type": "Expression"
+							},
+							"TriggerName": {
+								"value": "'@{pipeline().TriggerName}'",
+								"type": "Expression"
+							},
+							"LogFileName": {
+								"value": "'@{concat(utcNow('s'),'_log.csv')}'",
+								"type": "Expression"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "None",
+					"cacheSinks": {
+						"firstRowOnly": true
+					}
+				}
+			},
+			{
+				"name": "DF_LOGS_Failure",
+				"type": "ExecuteDataFlow",
+				"dependsOn": [
+					{
+						"activity": "FailEmailAlert",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "1.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"dataflow": {
+						"referenceName": "DF_LOGS",
+						"type": "DataFlowReference",
+						"parameters": {
+							"DFName": {
+								"value": "'@{pipeline().DataFactory}'",
+								"type": "Expression"
+							},
+							"PipelineName": {
+								"value": "'@{pipeline().Pipeline}'",
+								"type": "Expression"
+							},
+							"Status": {
+								"value": "'@{string('Faiilure')}'",
+								"type": "Expression"
+							},
+							"RunId": {
+								"value": "'@{pipeline().RunId}'",
+								"type": "Expression"
+							},
+							"TriggerName": {
+								"value": "'@{pipeline().TriggerName}'",
+								"type": "Expression"
+							},
+							"LogFileName": {
+								"value": "'@{concat(utcNow('yyyy-MM-dd HH:mm:ss'),'_log.csv')}'",
+								"type": "Expression"
+							}
+						}
+					},
+					"compute": {
+						"coreCount": 8,
+						"computeType": "General"
+					},
+					"traceLevel": "None",
+					"cacheSinks": {
+						"firstRowOnly": true
+					}
+				}
+			}
+		],
+		"parameters": {
+			"Name": {
+				"type": "string"
+			},
+			"Location": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-05-26T20:58:40Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

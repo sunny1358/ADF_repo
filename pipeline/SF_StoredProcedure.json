@@ -1,0 +1,112 @@
+{
+	"name": "SF_StoredProcedure",
+	"properties": {
+		"activities": [
+			{
+				"name": "CallStoredProcedure",
+				"type": "Script",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.00:00:05",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "LinkedService_Snowflake",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"parameters": [
+								{
+									"name": "EmpName",
+									"type": "String",
+									"value": {
+										"value": "@pipeline().parameters.EmpNmae",
+										"type": "Expression"
+									},
+									"direction": "Input"
+								},
+								{
+									"name": "EmpLocation",
+									"type": "String",
+									"value": {
+										"value": "@pipeline().parameters.EmpLocation",
+										"type": "Expression"
+									},
+									"direction": "Input"
+								}
+							],
+							"type": "NonQuery",
+							"text": "CALL employee_insert(?,?);"
+						}
+					],
+					"logSettings": {
+						"logDestination": "ActivityOutput"
+					}
+				}
+			},
+			{
+				"name": "Success Email Trigger",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "CallStoredProcedure",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Sucess_Email_Alert",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true
+				}
+			},
+			{
+				"name": "Failure Email Trigger",
+				"type": "ExecutePipeline",
+				"dependsOn": [
+					{
+						"activity": "CallStoredProcedure",
+						"dependencyConditions": [
+							"Failed"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"pipeline": {
+						"referenceName": "Failure_Email_Alert",
+						"type": "PipelineReference"
+					},
+					"waitOnCompletion": true,
+					"parameters": {
+						"emessage": {
+							"value": "@activity('CallStoredProcedure').Error.Message",
+							"type": "Expression"
+						}
+					}
+				}
+			}
+		],
+		"parameters": {
+			"EmpNmae": {
+				"type": "string"
+			},
+			"EmpLocation": {
+				"type": "string"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-05-28T19:34:06Z"
+	},
+	"type": "Microsoft.DataFactory/factories/pipelines"
+}

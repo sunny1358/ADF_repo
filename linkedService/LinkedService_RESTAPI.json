@@ -1,0 +1,22 @@
+{
+	"name": "LinkedService_RESTAPI",
+	"type": "Microsoft.DataFactory/factories/linkedservices",
+	"properties": {
+		"annotations": [],
+		"type": "RestService",
+		"typeProperties": {
+			"url": "https://gorest.co.in/public/v2/users",
+			"enableServerCertificateValidation": true,
+			"authenticationType": "Basic",
+			"userName": "admin",
+			"password": {
+				"type": "AzureKeyVaultSecret",
+				"store": {
+					"referenceName": "LinkedService_AzureKeyVault",
+					"type": "LinkedServiceReference"
+				},
+				"secretName": "APIPassword"
+			}
+		}
+	}
+}
