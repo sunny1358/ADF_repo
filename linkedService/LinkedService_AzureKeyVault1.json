@@ -1,0 +1,10 @@
+{
+	"name": "LinkedService_AzureKeyVault1",
+	"properties": {
+		"annotations": [],
+		"type": "AzureKeyVault",
+		"typeProperties": {
+			"baseUrl": "https://arunakvdev.vault.azure.net/"
+		}
+	}
+}
