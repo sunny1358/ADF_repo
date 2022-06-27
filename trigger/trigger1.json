@@ -8,6 +8,10 @@
 				"pipelineReference": {
 					"referenceName": "SF_StoredProcedure",
 					"type": "PipelineReference"
+				},
+				"parameters": {
+					"EmpNmae": "dhddjjd",
+					"EmpLocation": "dhdjdjd"
 				}
 			}
 		],
