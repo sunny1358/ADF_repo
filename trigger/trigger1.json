@@ -20,11 +20,11 @@
 			"recurrence": {
 				"frequency": "Day",
 				"interval": 1,
-				"startTime": "2022-06-28T18:05:00Z",
+				"startTime": "2022-06-27T18:10:00Z",
 				"timeZone": "UTC",
 				"schedule": {
 					"minutes": [
-						5
+						10
 					],
 					"hours": [
 						18
