@@ -1,0 +1,36 @@
+{
+	"name": "trigger1",
+	"properties": {
+		"annotations": [],
+		"runtimeState": "Started",
+		"pipelines": [
+			{
+				"pipelineReference": {
+					"referenceName": "SF_StoredProcedure",
+					"type": "PipelineReference"
+				},
+				"parameters": {
+					"EmpNmae": "dhddjjd",
+					"EmpLocation": "dhdjdjd"
+				}
+			}
+		],
+		"type": "ScheduleTrigger",
+		"typeProperties": {
+			"recurrence": {
+				"frequency": "Day",
+				"interval": 1,
+				"startTime": "2022-06-27T18:10:00Z",
+				"timeZone": "UTC",
+				"schedule": {
+					"minutes": [
+						10
+					],
+					"hours": [
+						18
+					]
+				}
+			}
+		}
+	}
+}

@@ -7,7 +7,7 @@
 				"type": "Script",
 				"dependsOn": [],
 				"policy": {
-					"timeout": "0.00:00:05",
+					"timeout": "7.00:00:00",
 					"retry": 0,
 					"retryIntervalInSeconds": 30,
 					"secureOutput": false,
@@ -42,7 +42,7 @@
 								}
 							],
 							"type": "NonQuery",
-							"text": "CALL employee_insert(?,?);"
+							"text": "CALL employee_inser(?,?);"
 						}
 					],
 					"logSettings": {
