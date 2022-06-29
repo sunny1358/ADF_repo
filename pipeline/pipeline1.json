@@ -55,7 +55,7 @@
 						{
 							"type": "NonQuery",
 							"text": {
-								"value": "INSERT INTO \"DEMO_DB\".\"PUBLIC\".\"ADF_LOG_DETAILS\" VALUES(\n'@{pipeline().DataFactory}','@{pipeline().Pipeline}','@{pipeline().RunId}''',\n'Success',\n'@{pipeline().TriggerName}','@{pipeline().TriggerTime}')",
+								"value": "INSERT INTO FI_RTR.INT_CUST_FIN.FI_RTR_INT_CUST_FIN_ADF_JOB_STATUS VALUES(\n'@{pipeline().DataFactory}','@{pipeline().Pipeline}','@{pipeline().RunId}''',\n'Success',\n'@{pipeline().TriggerName}','@{pipeline().TriggerTime}', NULL)",
 								"type": "Expression"
 							}
 						}
