@@ -42,7 +42,7 @@
 								}
 							],
 							"type": "NonQuery",
-							"text": "CALL employee_inser(?,?);"
+							"text": "CALL employee_insert(?,?);"
 						}
 					],
 					"logSettings": {
