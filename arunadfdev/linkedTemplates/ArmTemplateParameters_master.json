@@ -1,0 +1,54 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"value": "arunadfdev"
+		},
+		"LinkedService_ADLS_accountKey": {
+			"value": ""
+		},
+		"LinkedService_AzureSqlDatabase_connectionString": {
+			"value": ""
+		},
+		"LinkedService_Snowflake_connectionString": {
+			"value": ""
+		},
+		"LinkedService_ADLS_properties_typeProperties_url": {
+			"value": "https://arunadlsdev001.dfs.core.windows.net"
+		},
+		"LinkedService_AzureKeyVault_properties_typeProperties_baseUrl": {
+			"value": "https://arunakvdev.vault.azure.net/"
+		},
+		"LinkedService_AzureKeyVault1_properties_typeProperties_baseUrl": {
+			"value": "https://arunakvdev.vault.azure.net/"
+		},
+		"LinkedService_BlobStorage_sasUri": {
+			"value": ""
+		},
+		"LinkedService_RESTAPI_properties_typeProperties_url": {
+			"value": "https://gorest.co.in/public/v2/users"
+		},
+		"LinkedService_RESTAPI_properties_typeProperties_userName": {
+			"value": "admin"
+		},
+		"LinkedService_StorageAccount_sasUri": {
+			"value": ""
+		},
+		"Snowflake1_properties_typeProperties_connectionString_secretName": {
+			"value": "SF-CONNECTION-STRING"
+		},
+		"trigger1_properties_SF_StoredProcedure_parameters_EmpNmae": {
+			"value": "dhddjjd"
+		},
+		"trigger1_properties_SF_StoredProcedure_parameters_EmpLocation": {
+			"value": "dhdjdjd"
+		},
+		"containerUri": {
+			"value": ""
+		},
+		"containerSasToken": {
+			"value": ""
+		}
+	}
+}

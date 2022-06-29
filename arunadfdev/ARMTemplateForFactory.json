@@ -1,0 +1,1960 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "arunadfdev"
+		},
+		"LinkedService_ADLS_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'LinkedService_ADLS'"
+		},
+		"LinkedService_AzureSqlDatabase_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LinkedService_AzureSqlDatabase'"
+		},
+		"LinkedService_Snowflake_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LinkedService_Snowflake'"
+		},
+		"LinkedService_ADLS_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://arunadlsdev001.dfs.core.windows.net"
+		},
+		"LinkedService_AzureKeyVault_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://arunakvdev.vault.azure.net/"
+		},
+		"LinkedService_AzureKeyVault1_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://arunakvdev.vault.azure.net/"
+		},
+		"LinkedService_BlobStorage_sasUri": {
+			"type": "secureString",
+			"metadata": "Secure string for 'sasUri' of 'LinkedService_BlobStorage'"
+		},
+		"LinkedService_RESTAPI_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://gorest.co.in/public/v2/users"
+		},
+		"LinkedService_RESTAPI_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "admin"
+		},
+		"LinkedService_StorageAccount_sasUri": {
+			"type": "secureString",
+			"metadata": "Secure string for 'sasUri' of 'LinkedService_StorageAccount'"
+		},
+		"Snowflake1_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "SF-CONNECTION-STRING"
+		},
+		"trigger1_properties_SF_StoredProcedure_parameters_EmpNmae": {
+			"type": "string",
+			"defaultValue": "dhddjjd"
+		},
+		"trigger1_properties_SF_StoredProcedure_parameters_EmpLocation": {
+			"type": "string",
+			"defaultValue": "dhdjdjd"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/Failure_Email_Alert')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "FailEmailAlert",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": "https://prod-27.eastus.logic.azure.com:443/workflows/0dab07ad59d64cd1a06887d5131311fb/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=DDtgWFHRQkOuxNtSCa25Sf1QIflNAuTX25OT3SbIo6w",
+							"method": "POST",
+							"headers": {
+								"Content-Type": "application/json"
+							},
+							"body": {
+								"value": "{\n    \"title\" : \"PIPELINE EXECUTION FAILED!\",\n    \"color\" : \"Red\",\n    \"Message\" : \"@{pipeline().parameters.emessage}\",\n    \"PipelineName\" : \"@{pipeline()?.TriggeredByPipelineName}\",\n    \"DataFactoryName\" : \"@{pipeline().DataFactory}\",\n    \"PipelineRunId\" : \"@{pipeline()?.TriggeredByPipelineRunId}\",\n    \"time\" : \"@{utcNow('G')}\"\n}",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"emessage": {
+						"type": "string"
+					}
+				},
+				"folder": {
+					"name": "COMMON_PIPELINE"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-05-26T13:42:34Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LogAlerts')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CallProcesure",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "LinkedService_Snowflake",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "NonQuery",
+									"text": "call employee_insert('leo','hyd')"
+								}
+							]
+						}
+					},
+					{
+						"name": "Script1",
+						"type": "Script",
+						"dependsOn": [
+							{
+								"activity": "CallProcesure",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "LinkedService_Snowflake",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"type": "NonQuery",
+									"text": {
+										"value": "INSERT INTO FI_RTR.INT_CUST_FIN.FI_RTR_INT_CUST_FIN_ADF_JOB_STATUS VALUES(\n'@{pipeline().DataFactory}','@{pipeline().Pipeline}','@{pipeline().RunId}''',\n'Success',\n'@{pipeline().TriggerName}','@{pipeline().TriggerTime}', NULL)",
+										"type": "Expression"
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_Snowflake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PI_APItoSnowflake2')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Copy from API to ADLS",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET",
+								"paginationRules": {
+									"supportRFC5988": "true"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".txt"
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "LinkedService_BlobStorage",
+									"type": "LinkedServiceReference"
+								},
+								"path": "adlsdev/users"
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Dataset_API",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_UsersCSV_Blob",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "Copy from ADLS to Snowflake",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "Copy from API to ADLS",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "SnowflakeSink",
+								"preCopyScript": "truncate \"DEMO_DB\".\"PUBLIC\".\"USER_DETAILS\"",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand"
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "LinkedService_BlobStorage",
+									"type": "LinkedServiceReference"
+								},
+								"path": "adlsdev/staging"
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_UsersCSV_Blob",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_Snowflake",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-06-14T05:35:27Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Dataset_API')]",
+				"[concat(variables('factoryId'), '/datasets/DS_UsersCSV_Blob')]",
+				"[concat(variables('factoryId'), '/datasets/DS_Snowflake')]",
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_BlobStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_APItoAzureSQL')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "APItoAzureSQL",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET",
+								"paginationRules": {
+									"supportRFC5988": "true"
+								}
+							},
+							"sink": {
+								"type": "AzureSqlSink",
+								"writeBehavior": "upsert",
+								"upsertSettings": {
+									"useTempDB": true,
+									"keys": [
+										"id"
+									]
+								},
+								"sqlWriterUseTableLock": false,
+								"disableMetricsCollection": false
+							},
+							"enableStaging": false,
+							"translator": {
+								"type": "TabularTranslator",
+								"mappings": [
+									{
+										"source": {
+											"path": "$['id']"
+										},
+										"sink": {
+											"name": "id",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "$['imageUrl']"
+										},
+										"sink": {
+											"name": "imageURL",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['firstName']"
+										},
+										"sink": {
+											"name": "firstName",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['lastName']"
+										},
+										"sink": {
+											"name": "lastName",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['email']"
+										},
+										"sink": {
+											"name": "email",
+											"type": "String"
+										}
+									},
+									{
+										"source": {
+											"path": "$['age']"
+										},
+										"sink": {
+											"name": "age",
+											"type": "Int32"
+										}
+									},
+									{
+										"source": {
+											"path": "$['salary']"
+										},
+										"sink": {
+											"name": "salary",
+											"type": "Double"
+										}
+									},
+									{
+										"source": {
+											"path": "$['address']"
+										},
+										"sink": {
+											"name": "address",
+											"type": "String"
+										}
+									}
+								]
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Dataset_API",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "Dataset_EmployeeTable",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-05-28T19:34:08Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Dataset_API')]",
+				"[concat(variables('factoryId'), '/datasets/Dataset_EmployeeTable')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_APItoSnowflake')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "API to Blob Storage",
+						"type": "Copy",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "RestSource",
+								"httpRequestTimeout": "00:01:40",
+								"requestInterval": "00.00:00:00.010",
+								"requestMethod": "GET",
+								"paginationRules": {
+									"supportRFC5988": "true"
+								}
+							},
+							"sink": {
+								"type": "DelimitedTextSink",
+								"storeSettings": {
+									"type": "AzureBlobStorageWriteSettings"
+								},
+								"formatSettings": {
+									"type": "DelimitedTextWriteSettings",
+									"quoteAllText": true,
+									"fileExtension": ".csv"
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "LinkedService_StorageAccount",
+									"type": "LinkedServiceReference"
+								},
+								"path": "devcontainer/users",
+								"enableCompression": true
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "Dataset_API",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_UsersCSV_SA",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					},
+					{
+						"name": "blob to snowflake",
+						"type": "Copy",
+						"dependsOn": [
+							{
+								"activity": "API to Blob Storage",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"sink": {
+								"type": "SnowflakeSink",
+								"preCopyScript": "truncate \"DEMO_DB\".\"PUBLIC\".\"USER_DETAILS\"",
+								"importSettings": {
+									"type": "SnowflakeImportCopyCommand"
+								}
+							},
+							"enableStaging": true,
+							"stagingSettings": {
+								"linkedServiceName": {
+									"referenceName": "LinkedService_StorageAccount",
+									"type": "LinkedServiceReference"
+								},
+								"path": "devcontainer/staging"
+							}
+						},
+						"inputs": [
+							{
+								"referenceName": "DS_UsersCSV_SA",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						],
+						"outputs": [
+							{
+								"referenceName": "DS_Snowflake",
+								"type": "DatasetReference",
+								"parameters": {}
+							}
+						]
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-05-30T13:01:21Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/Dataset_API')]",
+				"[concat(variables('factoryId'), '/datasets/DS_UsersCSV_SA')]",
+				"[concat(variables('factoryId'), '/datasets/DS_Snowflake')]",
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_StorageAccount')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/PL_Snowflake')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CallStoredProcedure",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "LinkedService_Snowflake",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"parameters": [
+										{
+											"name": "EmpName",
+											"type": "String",
+											"value": {
+												"value": "@pipeline().parameters.Name",
+												"type": "Expression"
+											},
+											"direction": "Input"
+										},
+										{
+											"name": "EmpLocation",
+											"type": "String",
+											"value": {
+												"value": "@pipeline().parameters.Location",
+												"type": "Expression"
+											},
+											"direction": "Input"
+										}
+									],
+									"type": "NonQuery",
+									"text": "CALL employee_insert(?,?);"
+								}
+							],
+							"logSettings": {
+								"logDestination": "ActivityOutput"
+							}
+						}
+					},
+					{
+						"name": "FailEmailAlert",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "CallStoredProcedure",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": "https://prod-27.eastus.logic.azure.com:443/workflows/0dab07ad59d64cd1a06887d5131311fb/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=DDtgWFHRQkOuxNtSCa25Sf1QIflNAuTX25OT3SbIo6w",
+							"method": "POST",
+							"headers": {
+								"Content-Type": "application/json"
+							},
+							"body": {
+								"value": "{\n    \"title\" : \"PIPELINE EXECUTION FAILED!\",\n    \"color\" : \"Red\",\n    \"Message\" : \"@{activity('CallStoredProcedure').Error.Message}\",\n    \"PipelineName\" : \"@{pipeline().Pipeline}\",\n    \"DataFactoryName\" : \"@{pipeline().DataFactory}\",\n    \"PipelineRunId\" : \"@{pipeline().RunId}\",\n    \"time\" : \"@{utcNow('G')}\"\n}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "SuccessEmailAlert",
+						"type": "WebActivity",
+						"dependsOn": [
+							{
+								"activity": "CallStoredProcedure",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": "https://prod-27.eastus.logic.azure.com:443/workflows/0dab07ad59d64cd1a06887d5131311fb/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=DDtgWFHRQkOuxNtSCa25Sf1QIflNAuTX25OT3SbIo6w",
+							"method": "POST",
+							"headers": {
+								"Content-Type": "application/json"
+							},
+							"body": {
+								"value": "{\n    \"title\" : \"PIPELINE EXECUTED SUCCESSFULLY!\",\n    \"color\" : \"Green\",\n    \"Message\" : \"PIPELINE EXECUTED SUCCESSFULLY!\",\n    \"PipelineName\" : \"@{pipeline().Pipeline}\",\n    \"DataFactoryName\" : \"@{pipeline().DataFactory}\",\n    \"PipelineRunId\" : \"@{pipeline().RunId}\",\n    \"time\" : \"@{utcNow('G')}\"\n}",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "DF_LOGS",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "SuccessEmailAlert",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "1.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "DF_LOGS",
+								"type": "DataFlowReference",
+								"parameters": {
+									"DFName": {
+										"value": "'@{pipeline().DataFactory}'",
+										"type": "Expression"
+									},
+									"PipelineName": {
+										"value": "'@{pipeline().Pipeline}'",
+										"type": "Expression"
+									},
+									"Status": {
+										"value": "'@{string('success')}'",
+										"type": "Expression"
+									},
+									"RunId": {
+										"value": "'@{pipeline().RunId}'",
+										"type": "Expression"
+									},
+									"TriggerName": {
+										"value": "'@{pipeline().TriggerName}'",
+										"type": "Expression"
+									},
+									"LogFileName": {
+										"value": "'@{concat(utcNow('s'),'_log.csv')}'",
+										"type": "Expression"
+									}
+								},
+								"datasetParameters": {
+									"dummy": {},
+									"Log": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "None",
+							"cacheSinks": {
+								"firstRowOnly": true
+							}
+						}
+					},
+					{
+						"name": "DF_LOGS_Failure",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [
+							{
+								"activity": "FailEmailAlert",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"policy": {
+							"timeout": "1.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "DF_LOGS",
+								"type": "DataFlowReference",
+								"parameters": {
+									"DFName": {
+										"value": "'@{pipeline().DataFactory}'",
+										"type": "Expression"
+									},
+									"PipelineName": {
+										"value": "'@{pipeline().Pipeline}'",
+										"type": "Expression"
+									},
+									"Status": {
+										"value": "'@{string('Faiilure')}'",
+										"type": "Expression"
+									},
+									"RunId": {
+										"value": "'@{pipeline().RunId}'",
+										"type": "Expression"
+									},
+									"TriggerName": {
+										"value": "'@{pipeline().TriggerName}'",
+										"type": "Expression"
+									},
+									"LogFileName": {
+										"value": "'@{concat(utcNow('yyyy-MM-dd HH:mm:ss'),'_log.csv')}'",
+										"type": "Expression"
+									}
+								},
+								"datasetParameters": {
+									"dummy": {},
+									"Log": {}
+								}
+							},
+							"staging": {},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "None",
+							"cacheSinks": {
+								"firstRowOnly": true
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"Name": {
+						"type": "string"
+					},
+					"Location": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-05-26T20:58:40Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_Snowflake')]",
+				"[concat(variables('factoryId'), '/dataflows/DF_LOGS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/ReadQueryfromConfigFile')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "ReadConfigFile",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobFSReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "DelimitedText1",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "ReadConfigFile",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('ReadConfigFile').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Copy data1",
+									"type": "Copy",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"source": {
+											"type": "AzureSqlSource",
+											"sqlReaderQuery": {
+												"value": "@item().query",
+												"type": "Expression"
+											},
+											"queryTimeout": "02:00:00",
+											"partitionOption": "None"
+										},
+										"sink": {
+											"type": "DelimitedTextSink",
+											"storeSettings": {
+												"type": "AzureBlobFSWriteSettings"
+											},
+											"formatSettings": {
+												"type": "DelimitedTextWriteSettings",
+												"quoteAllText": true,
+												"fileExtension": ".txt"
+											}
+										},
+										"enableStaging": false,
+										"translator": {
+											"type": "TabularTranslator",
+											"typeConversion": true,
+											"typeConversionSettings": {
+												"allowDataTruncation": true,
+												"treatBooleanAsNumber": false
+											}
+										}
+									},
+									"inputs": [
+										{
+											"referenceName": "Dataset_EmployeeTable",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									],
+									"outputs": [
+										{
+											"referenceName": "EmployeeCSV_ADLS",
+											"type": "DatasetReference",
+											"parameters": {}
+										}
+									]
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-06-14T05:30:14Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DelimitedText1')]",
+				"[concat(variables('factoryId'), '/datasets/Dataset_EmployeeTable')]",
+				"[concat(variables('factoryId'), '/datasets/EmployeeCSV_ADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/SF_StoredProcedure')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "CallStoredProcedure",
+						"type": "Script",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"linkedServiceName": {
+							"referenceName": "LinkedService_Snowflake",
+							"type": "LinkedServiceReference"
+						},
+						"typeProperties": {
+							"scripts": [
+								{
+									"parameters": [
+										{
+											"name": "EmpName",
+											"type": "String",
+											"value": {
+												"value": "@pipeline().parameters.EmpNmae",
+												"type": "Expression"
+											},
+											"direction": "Input"
+										},
+										{
+											"name": "EmpLocation",
+											"type": "String",
+											"value": {
+												"value": "@pipeline().parameters.EmpLocation",
+												"type": "Expression"
+											},
+											"direction": "Input"
+										}
+									],
+									"type": "NonQuery",
+									"text": "CALL employee_insert(?,?);"
+								}
+							],
+							"logSettings": {
+								"logDestination": "ActivityOutput"
+							}
+						}
+					},
+					{
+						"name": "Success Email Trigger",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "CallStoredProcedure",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Sucess_Email_Alert",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {}
+						}
+					},
+					{
+						"name": "Failure Email Trigger",
+						"type": "ExecutePipeline",
+						"dependsOn": [
+							{
+								"activity": "CallStoredProcedure",
+								"dependencyConditions": [
+									"Failed"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"pipeline": {
+								"referenceName": "Failure_Email_Alert",
+								"type": "PipelineReference"
+							},
+							"waitOnCompletion": true,
+							"parameters": {
+								"emessage": {
+									"value": "@activity('CallStoredProcedure').Error.Message",
+									"type": "Expression"
+								}
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"EmpNmae": {
+						"type": "string"
+					},
+					"EmpLocation": {
+						"type": "string"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-05-28T19:34:06Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_Snowflake')]",
+				"[concat(variables('factoryId'), '/pipelines/Sucess_Email_Alert')]",
+				"[concat(variables('factoryId'), '/pipelines/Failure_Email_Alert')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Sucess_Email_Alert')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "SuccessEmailAlert",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": "https://prod-27.eastus.logic.azure.com:443/workflows/0dab07ad59d64cd1a06887d5131311fb/triggers/manual/paths/invoke?api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=DDtgWFHRQkOuxNtSCa25Sf1QIflNAuTX25OT3SbIo6w",
+							"method": "POST",
+							"headers": {
+								"Content-Type": "application/json"
+							},
+							"body": {
+								"value": "{\n    \"title\" : \"PIPELINE EXECUTED SUCCESSFULLY!\",\n    \"color\" : \"Green\",\n    \"Message\" : \"PIPELINE EXECUTED SUCCESSFULLY!\",\n    \"PipelineName\" : \"@{pipeline()?.TriggeredByPipelineName}\",\n    \"DataFactoryName\" : \"@{pipeline().DataFactory}\",\n    \"PipelineRunId\" : \"@{pipeline()?.TriggeredByPipelineRunId}\",\n    \"time\" : \"@{utcNow('G')}\"\n}",
+								"type": "Expression"
+							}
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"folder": {
+					"name": "COMMON_PIPELINE"
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-05-26T13:42:34Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/callSP_parameters')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"activities": [
+					{
+						"name": "Lookup1",
+						"type": "Lookup",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "7.00:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"source": {
+								"type": "DelimitedTextSource",
+								"storeSettings": {
+									"type": "AzureBlobStorageReadSettings",
+									"recursive": true,
+									"enablePartitionDiscovery": false
+								},
+								"formatSettings": {
+									"type": "DelimitedTextReadSettings"
+								}
+							},
+							"dataset": {
+								"referenceName": "DS_Config_Blob",
+								"type": "DatasetReference",
+								"parameters": {}
+							},
+							"firstRowOnly": false
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Lookup1",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Lookup1').output.value",
+								"type": "Expression"
+							},
+							"isSequential": true,
+							"activities": [
+								{
+									"name": "Script1",
+									"type": "Script",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "7.00:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"linkedServiceName": {
+										"referenceName": "LinkedService_Snowflake",
+										"type": "LinkedServiceReference"
+									},
+									"typeProperties": {
+										"scripts": [
+											{
+												"parameters": [
+													{
+														"name": "EmpName",
+														"type": "String",
+														"value": {
+															"value": "@item().Name",
+															"type": "Expression"
+														},
+														"direction": "Input"
+													},
+													{
+														"name": "EmpLocation",
+														"type": "String",
+														"value": {
+															"value": "@item().Location",
+															"type": "Expression"
+														},
+														"direction": "Input"
+													}
+												],
+												"type": "NonQuery",
+												"text": "CALL employee_insert(?,?)"
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-06-03T12:50:34Z"
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_Config_Blob')]",
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_Snowflake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DA_SA_Log')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LinkedService_StorageAccount",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"folderPath": "adf_logs",
+						"container": "devcontainer"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_StorageAccount')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Config_Blob')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LinkedService_StorageAccount",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "files.csv",
+						"folderPath": "config",
+						"container": "devcontainer"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"name": "Name",
+						"type": "String"
+					},
+					{
+						"name": "Location",
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_StorageAccount')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_EmployeeJsonSA')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LinkedService_StorageAccount",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Json",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "users.json",
+						"folderPath": "staging",
+						"container": "devcontainer"
+					}
+				},
+				"schema": {}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_StorageAccount')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_SA_Dummy')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LinkedService_StorageAccount",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": "dummy.txt",
+						"folderPath": "adf_logs",
+						"container": "devcontainer"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_StorageAccount')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_Snowflake')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LinkedService_Snowflake",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "SnowflakeTable",
+				"schema": [
+					{
+						"name": "PERSONID",
+						"type": "NUMBER",
+						"precision": 38,
+						"scale": 0
+					},
+					{
+						"name": "NAME",
+						"type": "VARCHAR",
+						"precision": 10,
+						"scale": 0
+					},
+					{
+						"name": "LASTMODIFIED",
+						"type": "TIMESTAMP_NTZ",
+						"precision": 29,
+						"scale": 9
+					}
+				],
+				"typeProperties": {
+					"schema": "PUBLIC",
+					"table": "USER_DETAILS"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_Snowflake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_UsersCSV_Blob')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LinkedService_BlobStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@concat('users_', formatDateTime(utcNow(), 'yyyy-dd-MM'),'.csv')",
+							"type": "Expression"
+						},
+						"folderPath": "users",
+						"container": "adlsdev"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_BlobStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DS_UsersCSV_SA')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LinkedService_StorageAccount",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobStorageLocation",
+						"fileName": {
+							"value": "@concat('users_', formatDateTime(utcNow(), 'yyyy-dd-MM'),'.csv')",
+							"type": "Expression"
+						},
+						"folderPath": "users",
+						"container": "devcontainer"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_StorageAccount')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Dataset_API')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LinkedService_RESTAPI",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "RestResource",
+				"typeProperties": {},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_RESTAPI')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Dataset_EmployeeTable')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LinkedService_AzureSqlDatabase",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "AzureSqlTable",
+				"schema": [
+					{
+						"name": "id",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "imageURL",
+						"type": "varchar"
+					},
+					{
+						"name": "firstName",
+						"type": "varchar"
+					},
+					{
+						"name": "lastName",
+						"type": "varchar"
+					},
+					{
+						"name": "email",
+						"type": "varchar"
+					},
+					{
+						"name": "contactNumber",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "age",
+						"type": "int",
+						"precision": 10
+					},
+					{
+						"name": "dob",
+						"type": "date"
+					},
+					{
+						"name": "salary",
+						"type": "float",
+						"precision": 15
+					},
+					{
+						"name": "address",
+						"type": "varchar"
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "employee"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_AzureSqlDatabase')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DelimitedText1')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LinkedService_ADLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "query_config.csv",
+						"folderPath": "configs",
+						"fileSystem": "adlsdev"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": [
+					{
+						"type": "String"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_ADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/EmployeeCSV_ADLS')]",
+			"type": "Microsoft.DataFactory/factories/datasets",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "LinkedService_ADLS",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "DelimitedText",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": {
+							"value": "@concat('employee_', formatDateTime(utcNow(), 'yyyy-dd-MM'),'.csv')",
+							"type": "Expression"
+						},
+						"folderPath": "employee",
+						"fileSystem": "adlsdev"
+					},
+					"columnDelimiter": ",",
+					"escapeChar": "\\",
+					"firstRowAsHeader": true,
+					"quoteChar": "\""
+				},
+				"schema": []
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_ADLS')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LinkedService_ADLS')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('LinkedService_ADLS_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('LinkedService_ADLS_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LinkedService_AzureKeyVault')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('LinkedService_AzureKeyVault_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LinkedService_AzureKeyVault1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('LinkedService_AzureKeyVault1_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LinkedService_AzureSqlDatabase')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": "[parameters('LinkedService_AzureSqlDatabase_connectionString')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "LinkedService_AzureKeyVault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "AzureSQLDBPassword"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_AzureKeyVault')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LinkedService_BlobStorage')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"sasUri": "[parameters('LinkedService_BlobStorage_sasUri')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LinkedService_RESTAPI')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('LinkedService_RESTAPI_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Basic",
+					"userName": "[parameters('LinkedService_RESTAPI_properties_typeProperties_userName')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "LinkedService_AzureKeyVault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "APIPassword"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_AzureKeyVault')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LinkedService_Snowflake')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Snowflake",
+				"typeProperties": {
+					"connectionString": "[parameters('LinkedService_Snowflake_connectionString')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "LinkedService_AzureKeyVault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "SnowflakePassword"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_AzureKeyVault')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LinkedService_StorageAccount')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobStorage",
+				"typeProperties": {
+					"sasUri": "[parameters('LinkedService_StorageAccount_sasUri')]"
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Snowflake1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Snowflake",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "LinkedService_AzureKeyVault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('Snowflake1_properties_typeProperties_connectionString_secretName')]"
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_AzureKeyVault')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/trigger1')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "SF_StoredProcedure",
+							"type": "PipelineReference"
+						},
+						"parameters": {
+							"EmpNmae": "[parameters('trigger1_properties_SF_StoredProcedure_parameters_EmpNmae')]",
+							"EmpLocation": "[parameters('trigger1_properties_SF_StoredProcedure_parameters_EmpLocation')]"
+						}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2022-06-27T18:10:00Z",
+						"timeZone": "UTC",
+						"schedule": {
+							"minutes": [
+								10
+							],
+							"hours": [
+								18
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/SF_StoredProcedure')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/DF_LOGS')]",
+			"type": "Microsoft.DataFactory/factories/dataflows",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "DS_SA_Dummy",
+								"type": "DatasetReference"
+							},
+							"name": "dummy"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DA_SA_Log",
+								"type": "DatasetReference"
+							},
+							"name": "Log"
+						}
+					],
+					"transformations": [
+						{
+							"name": "derivedColumn"
+						},
+						{
+							"name": "select"
+						}
+					],
+					"scriptLines": [
+						"parameters{",
+						"     DFName as string,",
+						"     PipelineName as string,",
+						"     Status as string,",
+						"     RunId as string,",
+						"     TriggerName as string,",
+						"     LogFileName as string",
+						"}",
+						"source(output(",
+						"          Column_1 as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false) ~> dummy",
+						"dummy derive(DFName = $DFName,",
+						"          PipelineName = $PipelineName,",
+						"          Status = $Status,",
+						"          RunId = $RunId,",
+						"          TriggerName = $TriggerName) ~> derivedColumn",
+						"derivedColumn select(mapColumn(",
+						"          DFName,",
+						"          PipelineName,",
+						"          Status,",
+						"          RunId,",
+						"          TriggerName",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> select",
+						"select sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     partitionFileNames:[($LogFileName)],",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     partitionBy('hash', 1)) ~> Log"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/datasets/DS_SA_Dummy')]",
+				"[concat(variables('factoryId'), '/datasets/DA_SA_Log')]"
+			]
+		}
+	]
+}
