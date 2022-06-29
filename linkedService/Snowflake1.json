@@ -1,19 +1,18 @@
 {
 	"name": "Snowflake1",
-	"type": "Microsoft.DataFactory/factories/linkedservices",
 	"properties": {
 		"annotations": [],
 		"type": "Snowflake",
 		"typeProperties": {
-			"connectionString": "jdbc:snowflake://xc72203.east-us-2.azure.snowflakecomputing.com/?user=arunmessi&db=DEMO_DB&warehouse=COMPUTE_WH",
-			"password": {
+			"connectionString": {
 				"type": "AzureKeyVaultSecret",
 				"store": {
 					"referenceName": "LinkedService_AzureKeyVault",
 					"type": "LinkedServiceReference"
 				},
-				"secretName": "SnowflakePassword"
+				"secretName": "SF-CONNECTION-STRING"
 			}
 		}
-	}
+	},
+	"type": "Microsoft.DataFactory/factories/linkedservices"
 }

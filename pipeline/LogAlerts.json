@@ -1,0 +1,68 @@
+{
+	"name": "LogAlerts",
+	"properties": {
+		"activities": [
+			{
+				"name": "CallProcesure",
+				"type": "Script",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "LinkedService_Snowflake",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "NonQuery",
+							"text": "call employee_insert('leo','hyd')"
+						}
+					]
+				}
+			},
+			{
+				"name": "Script1",
+				"type": "Script",
+				"dependsOn": [
+					{
+						"activity": "CallProcesure",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "7.00:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"linkedServiceName": {
+					"referenceName": "LinkedService_Snowflake",
+					"type": "LinkedServiceReference"
+				},
+				"typeProperties": {
+					"scripts": [
+						{
+							"type": "NonQuery",
+							"text": {
+								"value": "INSERT INTO FI_RTR.INT_CUST_FIN.FI_RTR_INT_CUST_FIN_ADF_JOB_STATUS VALUES(\n'@{pipeline().DataFactory}','@{pipeline().Pipeline}','@{pipeline().RunId}''',\n'Success',\n'@{pipeline().TriggerName}','@{pipeline().TriggerTime}', NULL)",
+								"type": "Expression"
+							}
+						}
+					]
+				}
+			}
+		],
+		"annotations": []
+	}
+}
