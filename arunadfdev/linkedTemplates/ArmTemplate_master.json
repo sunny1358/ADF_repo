@@ -92,9 +92,6 @@
 					"LinkedService_AzureSqlDatabase_connectionString": {
 						"value": "[parameters('LinkedService_AzureSqlDatabase_connectionString')]"
 					},
-					"LinkedService_Snowflake_connectionString": {
-						"value": "[parameters('LinkedService_Snowflake_connectionString')]"
-					},
 					"LinkedService_ADLS_properties_typeProperties_url": {
 						"value": "[parameters('LinkedService_ADLS_properties_typeProperties_url')]"
 					},
@@ -109,15 +106,6 @@
 					},
 					"LinkedService_StorageAccount_sasUri": {
 						"value": "[parameters('LinkedService_StorageAccount_sasUri')]"
-					},
-					"LinkedService_RESTAPI_properties_typeProperties_url": {
-						"value": "[parameters('LinkedService_RESTAPI_properties_typeProperties_url')]"
-					},
-					"LinkedService_RESTAPI_properties_typeProperties_userName": {
-						"value": "[parameters('LinkedService_RESTAPI_properties_typeProperties_userName')]"
-					},
-					"Snowflake1_properties_typeProperties_connectionString_secretName": {
-						"value": "[parameters('Snowflake1_properties_typeProperties_connectionString_secretName')]"
 					}
 				}
 			},
@@ -136,6 +124,18 @@
 				"parameters": {
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
+					},
+					"LinkedService_Snowflake_connectionString": {
+						"value": "[parameters('LinkedService_Snowflake_connectionString')]"
+					},
+					"LinkedService_RESTAPI_properties_typeProperties_url": {
+						"value": "[parameters('LinkedService_RESTAPI_properties_typeProperties_url')]"
+					},
+					"LinkedService_RESTAPI_properties_typeProperties_userName": {
+						"value": "[parameters('LinkedService_RESTAPI_properties_typeProperties_userName')]"
+					},
+					"Snowflake1_properties_typeProperties_connectionString_secretName": {
+						"value": "[parameters('Snowflake1_properties_typeProperties_connectionString_secretName')]"
 					},
 					"trigger1_properties_SF_StoredProcedure_parameters_EmpNmae": {
 						"value": "[parameters('trigger1_properties_SF_StoredProcedure_parameters_EmpNmae')]"

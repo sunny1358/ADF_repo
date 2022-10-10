@@ -7,6 +7,22 @@
 			"metadata": "Data Factory name",
 			"defaultValue": "arunadfdev"
 		},
+		"LinkedService_Snowflake_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'LinkedService_Snowflake'"
+		},
+		"LinkedService_RESTAPI_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://gorest.co.in/public/v2/users"
+		},
+		"LinkedService_RESTAPI_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "admin"
+		},
+		"Snowflake1_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "SF-CONNECTION-STRING"
+		},
 		"trigger1_properties_SF_StoredProcedure_parameters_EmpNmae": {
 			"type": "string",
 			"defaultValue": "dhddjjd"
@@ -20,6 +36,100 @@
 		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
 	},
 	"resources": [
+		{
+			"name": "[concat(parameters('factoryName'), '/LinkedService_RESTAPI')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "RestService",
+				"typeProperties": {
+					"url": "[parameters('LinkedService_RESTAPI_properties_typeProperties_url')]",
+					"enableServerCertificateValidation": true,
+					"authenticationType": "Basic",
+					"userName": "[parameters('LinkedService_RESTAPI_properties_typeProperties_userName')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "LinkedService_AzureKeyVault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "APIPassword"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/LinkedService_Snowflake')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Snowflake",
+				"typeProperties": {
+					"connectionString": "[parameters('LinkedService_Snowflake_connectionString')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "LinkedService_AzureKeyVault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "SnowflakePassword"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Snowflake1')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "Snowflake",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "LinkedService_AzureKeyVault",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('Snowflake1_properties_typeProperties_connectionString_secretName')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/tumbtrigger1')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipeline": {
+					"pipelineReference": {
+						"referenceName": "testpipeline",
+						"type": "PipelineReference"
+					},
+					"parameters": {}
+				},
+				"type": "TumblingWindowTrigger",
+				"typeProperties": {
+					"frequency": "Hour",
+					"interval": 1,
+					"startTime": "2022-10-10T15:00:00Z",
+					"delay": "00:00:00",
+					"maxConcurrency": 50,
+					"retryPolicy": {
+						"intervalInSeconds": 30
+					},
+					"dependsOn": []
+				}
+			},
+			"dependsOn": []
+		},
 		{
 			"name": "[concat(parameters('factoryName'), '/LogAlerts')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
@@ -93,7 +203,9 @@
 				},
 				"annotations": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_Snowflake')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/SF_StoredProcedure')]",
@@ -212,7 +324,9 @@
 				"annotations": [],
 				"lastPublishTime": "2022-05-28T19:34:06Z"
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_Snowflake')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/callSP_parameters')]",
@@ -327,7 +441,9 @@
 				"annotations": [],
 				"lastPublishTime": "2022-06-03T12:50:34Z"
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_Snowflake')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DS_Snowflake')]",
@@ -365,7 +481,9 @@
 					"table": "USER_DETAILS"
 				}
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_Snowflake')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Dataset_API')]",
@@ -381,7 +499,9 @@
 				"typeProperties": {},
 				"schema": []
 			},
-			"dependsOn": []
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_RESTAPI')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/Dataset_EmployeeTable')]",
@@ -446,6 +566,45 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/tumbtrigger2')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipeline": {
+					"pipelineReference": {
+						"referenceName": "testpipeline1",
+						"type": "PipelineReference"
+					},
+					"parameters": {}
+				},
+				"type": "TumblingWindowTrigger",
+				"typeProperties": {
+					"frequency": "Hour",
+					"interval": 1,
+					"startTime": "2022-10-10T15:00:00Z",
+					"delay": "00:00:00",
+					"maxConcurrency": 50,
+					"retryPolicy": {
+						"intervalInSeconds": 30
+					},
+					"dependsOn": [
+						{
+							"type": "TumblingWindowTriggerDependencyReference",
+							"referenceTrigger": {
+								"referenceName": "tumbtrigger1",
+								"type": "TriggerReference"
+							}
+						}
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/triggers/tumbtrigger1')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('factoryName'), '/DF_LOGS')]",
@@ -1207,6 +1366,7 @@
 				"lastPublishTime": "2022-05-26T20:58:40Z"
 			},
 			"dependsOn": [
+				"[concat(variables('factoryId'), '/linkedServices/LinkedService_Snowflake')]",
 				"[concat(variables('factoryId'), '/dataflows/DF_LOGS')]"
 			]
 		},
