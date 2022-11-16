@@ -51,6 +51,10 @@
 			"type": "string",
 			"defaultValue": "SF-CONNECTION-STRING"
 		},
+		"test_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/e12800fe-c96f-4a9c-9af3-41a130b6b39c/resourceGroups/dev-resourcegroup/providers/Microsoft.Storage/storageAccounts/arunadlsdev001"
+		},
 		"trigger1_properties_SF_StoredProcedure_parameters_EmpNmae": {
 			"type": "string",
 			"defaultValue": "dhddjjd"
@@ -1885,6 +1889,7 @@
 				"annotations": [],
 				"type": "Snowflake",
 				"typeProperties": {
+					"authenticationType": "Basic",
 					"connectionString": "[parameters('LinkedService_Snowflake_connectionString')]",
 					"password": {
 						"type": "AzureKeyVaultSecret",
@@ -1921,6 +1926,7 @@
 				"annotations": [],
 				"type": "Snowflake",
 				"typeProperties": {
+					"authenticationType": "Basic",
 					"connectionString": {
 						"type": "AzureKeyVaultSecret",
 						"store": {
@@ -1933,6 +1939,37 @@
 			},
 			"dependsOn": [
 				"[concat(variables('factoryId'), '/linkedServices/LinkedService_AzureKeyVault')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/test')]",
+			"type": "Microsoft.DataFactory/factories/triggers",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "testpipeline2",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "BlobEventsTrigger",
+				"typeProperties": {
+					"blobPathBeginsWith": "/adlsdev/blobs/config/",
+					"blobPathEndsWith": ".txt",
+					"ignoreEmptyBlobs": true,
+					"scope": "[parameters('test_properties_typeProperties_scope')]",
+					"events": [
+						"Microsoft.Storage.BlobCreated"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/pipelines/testpipeline2')]"
 			]
 		},
 		{

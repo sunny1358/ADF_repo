@@ -51,6 +51,10 @@
 			"type": "string",
 			"defaultValue": "SF-CONNECTION-STRING"
 		},
+		"test_properties_typeProperties_scope": {
+			"type": "string",
+			"defaultValue": "/subscriptions/e12800fe-c96f-4a9c-9af3-41a130b6b39c/resourceGroups/dev-resourcegroup/providers/Microsoft.Storage/storageAccounts/arunadlsdev001"
+		},
 		"trigger1_properties_SF_StoredProcedure_parameters_EmpNmae": {
 			"type": "string",
 			"defaultValue": "dhddjjd"
@@ -136,6 +140,9 @@
 					},
 					"Snowflake1_properties_typeProperties_connectionString_secretName": {
 						"value": "[parameters('Snowflake1_properties_typeProperties_connectionString_secretName')]"
+					},
+					"test_properties_typeProperties_scope": {
+						"value": "[parameters('test_properties_typeProperties_scope')]"
 					},
 					"trigger1_properties_SF_StoredProcedure_parameters_EmpNmae": {
 						"value": "[parameters('trigger1_properties_SF_StoredProcedure_parameters_EmpNmae')]"
