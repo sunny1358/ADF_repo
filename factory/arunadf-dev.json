@@ -1,0 +1,9 @@
+{
+	"name": "arunadf-dev",
+	"properties": {
+		"globalConfigurations": {
+			"PipelineBillingEnabled": "true"
+		}
+	},
+	"location": "eastus"
+}
