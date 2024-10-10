@@ -54,7 +54,7 @@
 									"physicalType": "String"
 								},
 								"sink": {
-									"name": "Customer",
+									"name": "CustomerId",
 									"type": "String",
 									"physicalType": "varchar"
 								}
@@ -90,7 +90,7 @@
 									"physicalType": "String"
 								},
 								"sink": {
-									"name": "Comapany",
+									"name": "Company",
 									"type": "String",
 									"physicalType": "varchar"
 								}
