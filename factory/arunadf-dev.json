@@ -1,0 +1,9 @@
+{
+	"name": "arunadf-dev",
+	"location": "eastus",
+	"identity": {
+		"type": "SystemAssigned",
+		"principalId": "a854d072-9207-481c-b51a-87c344a97648",
+		"tenantId": "36aee7ea-2b66-470c-8837-6b452e83e8f6"
+	}
+}
