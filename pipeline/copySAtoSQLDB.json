@@ -163,8 +163,8 @@
 								},
 								"sink": {
 									"name": "SubscriptionDate",
-									"type": "DateTime",
-									"physicalType": "datetime"
+									"type": "String",
+									"physicalType": "varchar"
 								}
 							},
 							{
